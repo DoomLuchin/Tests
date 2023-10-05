@@ -1,0 +1,41 @@
+﻿name : CustomerApi-CI
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ImageName: 'historyapi.azurecr.io/logiztikalliance/historyapi:$(docker.version)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build and push Docker image
+    steps:
+    - task: Docker@1      
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: 'historyApiServiceConnection'
+        command: 'Build an image'
+        dockerFile: '**LogCloudApiLogsAlliance/Dockerfile'
+        imageName: '$(ImageName)'
+        useDefaultContext: true
+      displayName: 'Build the Docker image'
+
+    - task: Docker@1      
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: 'historyApiServiceConnection'
+        command: 'Push an image'
+        imageName: '$(ImageName)'
+      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+      displayName: 'Push the Docker image to Dockerhub'
+    
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'sshConnect'
+        runOptions: 'commands'
+        commands: 'cd /home/alliance/docker/THISTORYAPI && docker-compose pull 2> docker-compose.log;cd /home/alliance/docker/THISTORYAPI && docker-compose up -d 2> docker-compose.log'
+        readyTimeout: '20000000'

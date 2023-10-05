@@ -1,0 +1,1 @@
+Scaffold-DbContext "Server=SRV-BDD-TEST35,11435;Database=logsAlliance;Trusted_Connection=True;TrustServerCertificate=True;user id=UsrPruebAlliance;password=jaemxVAN.V12;" Microsoft.EntityFrameworkCore.SqlServer -context ApiContext -ContextDir Data -OutputDir Models -T Historico -f
